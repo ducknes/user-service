@@ -65,7 +65,7 @@ func (a *App) Stop(ctx context.Context) {
 	}
 
 	if err := a.kafkaConsumer.Stop(); err != nil {
-		a.logger.Error(fmt.Sprintf("не удалось остановить косьюмер", err))
+		a.logger.Error(fmt.Sprintf("не удалось остановить косьюмер: %v", err))
 	}
 }
 
