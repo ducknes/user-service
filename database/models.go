@@ -1,5 +1,7 @@
 package database
 
+import "time"
+
 type User struct {
 	Id                string `bson:"_id,omitempty"`
 	Surname           string `bson:"surname"`
@@ -7,4 +9,14 @@ type User struct {
 	Lastname          string `bson:"lastname"`
 	RegisteredObjects int    `bson:"registeredObjects"`
 	Role              uint   `bson:"role"`
+}
+
+type ApproveMessage struct {
+	UserId    string `json:"user_id"`
+	ProductId string `json:"product_id"`
+}
+
+type ApprovedItem struct {
+	ProductId   string    `json:"product_id"`
+	ApproveTime time.Time `json:"approve_time"`
 }

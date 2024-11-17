@@ -5,6 +5,12 @@
       "connection": "mongodb://localhost:27017/?direct=true",
       "database": "user-service",
       "collection": "users"
+    },
+    "kafka": {
+      "address": "localhost:9091,localhost:9092,localhost:9093",
+      "producerTopic": "storage-service",
+      "consumerTopic": "user-service",
+      "consumerGroup": "approve-products"
     }
   }
 }

@@ -3,15 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/GOAT-prod/goatlogger"
-	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"os"
 	"time"
 	"user-service/api"
 	"user-service/database"
+	"user-service/database/kafka"
 	"user-service/service"
 	"user-service/settings"
+
+	"github.com/GOAT-prod/goatlogger"
+	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type App struct {
@@ -24,6 +26,10 @@ type App struct {
 	mongo          *mongo.Client
 	userRepository database.UserRepository
 	userService    service.User
+
+	kafkaProducer   *kafka.Producer
+	kafkaConsumer   *kafka.Consumer
+	messageHandeler kafka.MessageHandler
 }
 
 func NewApp(ctx context.Context, config settings.Config, logger goatlogger.Logger) *App {
@@ -60,8 +66,6 @@ func (a *App) initDatabases() {
 	a.initMongo()
 }
 
-func (a *App) initKafka() {}
-
 func (a *App) initMongo() {
 	mongoClient, err := database.MongoConnect(a.mainCtx, a.config.Databases.MongoDB.ConnectionString)
 	if err != nil {
@@ -74,6 +78,30 @@ func (a *App) initMongo() {
 
 func (a *App) initRepositories() {
 	a.userRepository = database.NewUserRepository(a.mongo, a.config.Databases.MongoDB.Database, a.config.Databases.MongoDB.Collection)
+}
+
+func (a *App) initKafka() {
+	producer, err := kafka.NewProducer(a.config.Databases.Kafka.Address, a.config.Databases.Kafka.ProducerTopic)
+	if err != nil {
+		a.logger.Panic(fmt.Sprintf("не удалось инициализировать продюсер: %v", err))
+		os.Exit(1)
+	}
+
+	a.kafkaProducer = producer
+
+	a.messageHandeler = kafka.NewMessageHandler(a.userRepository, a.kafkaProducer)
+
+	consumer, err := kafka.NewConsumer(
+		a.messageHandeler,
+		a.config.Databases.Kafka.Address,
+		a.config.Databases.Kafka.ConsumerTopic,
+		a.config.Databases.Kafka.ConsumerGroup)
+	if err != nil {
+		a.logger.Panic(fmt.Sprintf("не удалось инициализировать консюмер: %v", err))
+		os.Exit(1)
+	}
+
+	a.kafkaConsumer = consumer
 }
 
 func (a *App) initServices() {
