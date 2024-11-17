@@ -10,6 +10,7 @@ import (
 	"user-service/database/kafka"
 	"user-service/service"
 	"user-service/settings"
+	"user-service/tools/usercontext"
 
 	"github.com/GOAT-prod/goatlogger"
 	"github.com/gofiber/fiber/v2"
@@ -47,6 +48,8 @@ func (a *App) Start() {
 			os.Exit(1)
 		}
 	}()
+
+	go a.kafkaConsumer.Consume(usercontext.New())
 }
 
 func (a *App) Stop(ctx context.Context) {
@@ -59,6 +62,10 @@ func (a *App) Stop(ctx context.Context) {
 
 	if err := a.mongo.Disconnect(stopCtx); err != nil {
 		a.logger.Error(fmt.Sprintf("не удалось отключиться от монги: %v", err))
+	}
+
+	if err := a.kafkaConsumer.Stop(); err != nil {
+		a.logger.Error(fmt.Sprintf("не удалось остановить косьюмер", err))
 	}
 }
 
