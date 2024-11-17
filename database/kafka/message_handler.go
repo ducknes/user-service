@@ -37,6 +37,8 @@ func (h *Impl) HandleMessage(ctx usercontext.UserContext, message []byte) error 
 	approvedItems := make([]database.ApprovedItem, 0, len(approveItems))
 
 	for _, item := range approveItems {
+		ctx.Log().Info(fmt.Sprintf("Продукт %s ожидает подтвержения от %s", item.ProductId, item.UserId))
+
 		approver, err := h.userRepository.GetUser(ctx, item.UserId)
 		if err != nil {
 			ctx.Log().Error(fmt.Sprintf("не удалось получить согласующего из базы: %v", err))
@@ -54,6 +56,8 @@ func (h *Impl) HandleMessage(ctx usercontext.UserContext, message []byte) error 
 			ProductId:   item.ProductId,
 			ApproveTime: time.Now(),
 		})
+
+		ctx.Log().Info(fmt.Sprintf("Продукт %s подтвержден %s", item.ProductId, item.UserId))
 	}
 
 	if err := h.kafkaProducer.Produce(approvedItems); err != nil {

@@ -28,6 +28,7 @@ func main() {
 	app := NewApp(mainCtx, cfg, logger)
 	app.initDatabases()
 	app.initRepositories()
+	app.initKafka()
 	app.initServices()
 	app.initServer()
 	app.Start()
