@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/GOAT-prod/goatlogger"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 	"user-service/settings"
+
+	"github.com/GOAT-prod/goatlogger"
 )
 
 func main() {
