@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	_sessionTimeout     = 5000 // ms
+	_sessionTimeout     = 7000 // ms
 	_autoCommitInterval = 5000
 	_consumeTimeout     = -1
 )
