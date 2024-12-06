@@ -4,6 +4,8 @@ import "time"
 
 type User struct {
 	Id                string `bson:"_id,omitempty"`
+	Username          string `bson:"username"`
+	Password          string `bson:"password"`
 	Surname           string `bson:"surname"`
 	Name              string `bson:"name"`
 	Lastname          string `bson:"lastname"`

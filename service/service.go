@@ -15,6 +15,8 @@ type User interface {
 	SaveUser(ctx usercontext.UserContext, user domain.User) error
 	DeleteUser(ctx usercontext.UserContext, id string) error
 	UpdateUser(ctx usercontext.UserContext, user domain.User) error
+	RegisterUser(ctx usercontext.UserContext, user domain.User) (domain.User, error)
+	GetUserByUsername(ctx usercontext.UserContext, username string) (domain.User, error)
 }
 
 type Impl struct {
@@ -63,4 +65,26 @@ func (s *Impl) DeleteUser(ctx usercontext.UserContext, id string) error {
 
 func (s *Impl) UpdateUser(ctx usercontext.UserContext, user domain.User) error {
 	return s.userRepository.UpdateUsers(ctx, []database.User{mappings.ToDatabase(user)})
+}
+
+func (s *Impl) RegisterUser(ctx usercontext.UserContext, user domain.User) (domain.User, error) {
+	registeredUser, err := s.userRepository.RegisterUser(ctx, mappings.ToDatabase(user))
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return mappings.ToDomain(registeredUser), nil
+}
+
+func (s *Impl) GetUserByUsername(ctx usercontext.UserContext, username string) (domain.User, error) {
+	user, err := s.userRepository.GetUserByUserName(ctx, username)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return domain.User{}, nil
+		}
+		
+		return domain.User{}, err
+	}
+
+	return mappings.ToDomain(user), nil
 }

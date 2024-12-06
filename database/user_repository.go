@@ -15,6 +15,8 @@ type UserRepository interface {
 	SaveUsers(ctx usercontext.UserContext, users []User) error
 	UpdateUsers(ctx usercontext.UserContext, users []User) error
 	DeleteUsers(ctx usercontext.UserContext, ids []string) error
+	RegisterUser(ctx usercontext.UserContext, user User) (User, error)
+	GetUserByUserName(ctx usercontext.UserContext, username string) (user User, err error)
 }
 
 type RepositoryImpl struct {
@@ -134,6 +136,27 @@ func (r *RepositoryImpl) DeleteUsers(ctx usercontext.UserContext, ids []string) 
 	}
 
 	return err
+}
+
+func (r *RepositoryImpl) RegisterUser(ctx usercontext.UserContext, user User) (User, error) {
+	collection := r.mongoClient.Database(r.database).Collection(r.collection)
+	userId, err := collection.InsertOne(ctx.Ctx(), user)
+	if err != nil {
+		return User{}, err
+	}
+
+	insertedUser, err := r.GetUser(ctx, userId.InsertedID.(primitive.ObjectID).Hex())
+	if err != nil {
+		return User{}, err
+	}
+
+	return insertedUser, nil
+}
+
+func (r *RepositoryImpl) GetUserByUserName(ctx usercontext.UserContext, username string) (user User, err error) {
+	collection := r.mongoClient.Database(r.database).Collection(r.collection)
+	filter := bson.M{"username": username}
+	return user, collection.FindOne(ctx.Ctx(), filter).Decode(&user)
 }
 
 func toAny[T any](any []T) (result []any) {

@@ -23,5 +23,8 @@ func NewServer(userService service.User) *fiber.App {
 	app.Delete("/user", handlers.DeleteUserHandler(userService))
 	app.Put("/user", handlers.UpdateUserHandler(userService))
 
+	app.Post("/user/registration", handlers.RegisterUserHandler(userService))
+	app.Get("/user/by-username", handlers.GetUserByUsername(userService))
+
 	return app
 }

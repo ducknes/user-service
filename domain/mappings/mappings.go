@@ -9,6 +9,8 @@ import (
 func ToDomain(user database.User) domain.User {
 	return domain.User{
 		Id:       user.Id,
+		Username: user.Username,
+		Password: user.Password,
 		Surname:  user.Surname,
 		Name:     user.Name,
 		Lastname: user.Lastname,
@@ -19,6 +21,8 @@ func ToDomain(user database.User) domain.User {
 func ToDatabase(user domain.User) database.User {
 	return database.User{
 		Id:       user.Id,
+		Username: user.Username,
+		Password: user.Password,
 		Surname:  user.Surname,
 		Name:     user.Name,
 		Lastname: user.Lastname,
